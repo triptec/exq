@@ -3,8 +3,8 @@ defmodule Exq.Redis.Connection do
   alias Exq.Support.Config
 
   def connection(opts \\ []) do
-    {host, port, database, password, reconnect_on_sleep} = info(opts)
-    :eredis.start_link(host, port, database, password, reconnect_on_sleep)
+    {host, port, database, password, reconnect_on_sleep, timeout} = info(opts)
+    :eredis.start_link(host, port, database, password, reconnect_on_sleep, timeout)
   end
 
   def info(opts \\ []) do
@@ -13,9 +13,10 @@ defmodule Exq.Redis.Connection do
     database = Keyword.get(opts, :database, Config.get(:database, 0))
     password = Keyword.get(opts, :password, Config.get(:password) || '')
     reconnect_on_sleep = Keyword.get(opts, :reconnect_on_sleep, Config.get(:reconnect_on_sleep, 100))
+    timeout = Keyword.get(opts, :redis_timeout, Config.get(:redis_timeout, 5000))
     if is_binary(host), do: host = String.to_char_list(host)
     if is_binary(password), do: password = String.to_char_list(password)
-    {host, port, database, password, reconnect_on_sleep}
+    {host, port, database, password, reconnect_on_sleep, timeout}
   end
 
   def flushdb!(redis) do
